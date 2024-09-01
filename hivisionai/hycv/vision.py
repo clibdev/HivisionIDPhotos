@@ -15,7 +15,7 @@ def calTime(mark):
             def wrapper(*args, **kw):
                 start_time = time.time()
                 return_param = func(*args, **kw)
-                print("[Mark-{}] {} 函数花费的时间为 {:.2f}.".format(mark, func.__name__, time.time() - start_time))
+                print("[Mark-{}] {} The time taken by the function is {:.2f}.".format(mark, func.__name__, time.time() - start_time))
                 return return_param
 
             return wrapper
@@ -28,7 +28,7 @@ def calTime(mark):
         def wrapper(*args, **kw):
             start_time = time.time()
             return_param = func(*args, **kw)
-            print("{} 函数花费的时间为 {:.2f}.".format(func.__name__, time.time() - start_time))
+            print("{} The time taken by the function is {:.2f}.".format(func.__name__, time.time() - start_time))
             return return_param
 
         return wrapper
@@ -214,16 +214,16 @@ def draw_picture_rectangle(image, bbox, pen_size=2, pen_color=(0, 0, 255)):
 
 
 def generate_gradient(start_color, width, height, mode="updown"):
-    # 定义背景颜色
-    end_color = (255, 255, 255) # 白色
+    # Define background color
+    end_color = (255, 255, 255) # White
 
-    # 创建一个空白图像
+    # Create a blank image
     r_out = np.zeros((height, width), dtype=int)
     g_out = np.zeros((height, width), dtype=int)
     b_out = np.zeros((height, width), dtype=int)
 
     if mode == "updown":
-        # 生成上下渐变色
+        # Generate up and down gradient colors
         for y in range(height):
             r = int((y / height) * end_color[0] + ((height - y) / height) * start_color[0])
             g = int((y / height) * end_color[1] + ((height - y) / height) * start_color[1])
@@ -233,14 +233,14 @@ def generate_gradient(start_color, width, height, mode="updown"):
             b_out[y, :] = b
 
     else:
-        # 生成中心渐变色
+        # Generate center gradient color
         img = np.zeros((height, width, 3))
-        # 定义椭圆中心和半径
+        # Define the ellipse center and radius
         center = (width//2, height//2)
         end_axies = max(height, width)
-        # 定义渐变色
+        # Define gradient colors
         end_color = (255, 255, 255)
-        # 绘制椭圆
+        # Draw an ellipse
         for y in range(end_axies):
             axes = (end_axies - y, end_axies - y)
             r = int((y / end_axies) * end_color[0] + ((end_axies - y) / end_axies) * start_color[0])

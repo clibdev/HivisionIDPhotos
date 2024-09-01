@@ -1,6 +1,5 @@
-opencv-python==4.7.0.72
-onnx==1.14.0
-onnxruntime==1.15.0
-numpy==1.24.3
-gradio==3.38.0
+opencv-python>=4.10.0
+onnx>=1.16.0
+onnxruntime>=1.19.0
+gradio>=4.29.0
 fastapi

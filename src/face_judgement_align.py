@@ -119,7 +119,7 @@ def image_matting(input_image, params):
         - origin_png_image: numpy.array(4 channels)， 抠好的图
     """
 
-    print("抠图采用本地模型")
+    print("Cutting uses local model")
     origin_png_image = get_modnet_matting(input_image, sess=params["modnet"]["human_sess"])
 
     origin_png_image = hollowOutFix(origin_png_image)  # 抠图洞洞修补
@@ -456,7 +456,7 @@ def debug_mode_process(testImages):
             return result_image_test
 
 
-@calTime("主函数")
+@calTime("Main function")
 def IDphotos_create(input_image,
                     mode="ID",
                     size=(413, 295),
@@ -507,7 +507,7 @@ def IDphotos_create(input_image,
 
     # Step3. 抠图
     origin_png_image = image_matting(input_image, matting_params)
-    if mode == "只换底":
+    if mode == "Only change the background":
         return origin_png_image, origin_png_image, None, None, None, None, None, None, 1
 
     origin_png_image_pre = origin_png_image.copy()  # 备份一下现在抠图结果图，之后在iphoto_cutting函数有用

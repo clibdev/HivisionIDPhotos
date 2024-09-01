@@ -6,17 +6,19 @@ from src.layoutCreate import generate_layout_photo, generate_layout_image
 import pathlib
 import numpy as np
 
-size_list_dict = {"一寸": (413, 295), "二寸": (626, 413),
-                  "教师资格证": (413, 295), "国家公务员考试": (413, 295), "初级会计考试": (413, 295)}
-color_list_dict = {"蓝色": (86, 140, 212), "白色": (255, 255, 255), "红色": (233, 51, 35)}
+size_list_dict = {"One inch": (413, 295), "Two inches": (626, 413),
+                  "Teacher Qualification Certificate": (413, 295),
+                  "National Civil Service Examination": (413, 295),
+                  "Primary Accounting Examination": (413, 295)}
+color_list_dict = {"Blue": (86, 140, 212), "White": (255, 255, 255), "Red": (233, 51, 35)}
 
 
-# 设置Gradio examples
+# Setting up Gradio examples
 def set_example_image(example: list) -> dict:
-    return gr.Image.update(value=example[0])
+    return gr.update(value=example[0])
 
 
-# 检测RGB是否超出范围，如果超出则约束到0～255之间
+# Check if RGB is out of range, if so constrain it to between 0 and 255
 def range_check(value, min_value=0, max_value=255):
     value = int(value)
     if value <= min_value:
@@ -47,24 +49,28 @@ def idphoto_inference(input_image,
         "render_mode": render_option,
     }
 
-    # 如果尺寸模式选择的是尺寸列表
-    if idphoto_json["size_mode"] == "尺寸列表":
+    # If the size mode is selected as Size list
+    if idphoto_json["size_mode"] == "Size list":
         idphoto_json["size"] = size_list_dict[size_list_option]
-    # 如果尺寸模式选择的是自定义尺寸
-    elif idphoto_json["size_mode"] == "自定义尺寸":
+    # If the size mode is selected as Custom size
+    elif idphoto_json["size_mode"] == "Custom size":
         id_height = int(custom_size_height)
         id_width = int(custom_size_width)
         if id_height < id_width or min(id_height, id_width) < 100 or max(id_height, id_width) > 1800:
             return {
                 img_output_standard: gr.update(value=None),
                 img_output_standard_hd: gr.update(value=None),
-                notification: gr.update(value="宽度应不大于长度；长宽不应小于100，大于1800", visible=True)}
+                notification: gr.update(
+                    value="The width should not be greater than the length; the length and width should not be less than 100 and greater than 1800",
+                    visible=True
+                )
+            }
         idphoto_json["size"] = (id_height, id_width)
     else:
         idphoto_json["size"] = (None, None)
 
-    # 如果颜色模式选择的是自定义底色
-    if idphoto_json["color_mode"] == "自定义底色":
+    # If the color mode is selected as Custom background color
+    if idphoto_json["color_mode"] == "Custom background color":
         idphoto_json["color_bgr"] = (range_check(custom_color_R),
                                      range_check(custom_color_G),
                                      range_check(custom_color_B))
@@ -85,21 +91,21 @@ def idphoto_inference(input_image,
                                          top_distance_max=top_distance_max,
                                          top_distance_min=top_distance_min)
 
-    # 如果检测到人脸数量不等于1
+    # If the number of detected faces is not equal to 1
     if status == 0:
         result_messgae = {
             img_output_standard: gr.update(value=None),
             img_output_standard_hd: gr.update(value=None),
-            notification: gr.update(value="人脸数量不等于1", visible=True)
+            notification: gr.update(value="The number of faces is not equal to 1", visible=True)
         }
 
-    # 如果检测到人脸数量等于1
+    # If the number of detected faces is equal to 1
     else:
-        if idphoto_json["render_mode"] == "纯色":
+        if idphoto_json["render_mode"] == "Solid color":
             result_image_standard = np.uint8(
                 add_background(result_image_standard, bgr=idphoto_json["color_bgr"]))
             result_image_hd = np.uint8(add_background(result_image_hd, bgr=idphoto_json["color_bgr"]))
-        elif idphoto_json["render_mode"] == "上下渐变(白)":
+        elif idphoto_json["render_mode"] == "Up and down gradient (white)":
             result_image_standard = np.uint8(
                 add_background(result_image_standard, bgr=idphoto_json["color_bgr"], mode="updown_gradient"))
             result_image_hd = np.uint8(
@@ -110,7 +116,7 @@ def idphoto_inference(input_image,
             result_image_hd = np.uint8(
                 add_background(result_image_hd, bgr=idphoto_json["color_bgr"], mode="center_gradient"))
 
-        if idphoto_json["size_mode"] == "只换底":
+        if idphoto_json["size_mode"] == "Only change the background":
             result_layout_image = gr.update(visible=False)
         else:
             typography_arr, typography_rotate = generate_layout_photo(input_height=idphoto_json["size"][0],
@@ -133,13 +139,13 @@ def idphoto_inference(input_image,
 if __name__ == "__main__":
     HY_HUMAN_MATTING_WEIGHTS_PATH = "./hivision_modnet.onnx"
     sess = onnxruntime.InferenceSession(HY_HUMAN_MATTING_WEIGHTS_PATH)
-    size_mode = ["尺寸列表", "只换底", "自定义尺寸"]
-    size_list = ["一寸", "二寸", "教师资格证", "国家公务员考试", "初级会计考试"]
-    colors = ["蓝色", "白色", "红色", "自定义底色"]
-    render = ["纯色", "上下渐变(白)", "中心渐变(白)"]
+    size_mode = ["Size list", "Only change the background", "Custom size"]
+    size_list = ["One inch", "Two inches", "Teacher Qualification Certificate", "National Civil Service Examination", "Primary Accounting Examination"]
+    colors = ["Blue", "White", "Red", "Custom background color"]
+    render = ["Solid color", "Up and down gradient (white)", "Center gradient (white)"]
 
     title = "<h1 id='title'>HivisionIDPhotos</h1>"
-    description = "<h3>😎6.20更新：新增尺寸选择列表</h3>"
+    description = "<h3>😎6.20 Update: Added new size selection list</h3>"
     css = '''
     h1#title, h3 {
       text-align: center;
@@ -153,49 +159,49 @@ if __name__ == "__main__":
         gr.Markdown(description)
         with gr.Row():
             with gr.Column():
-                img_input = gr.Image().style(height=350)
-                mode_options = gr.Radio(choices=size_mode, label="证件照尺寸选项", value="尺寸列表", elem_id="size")
-                # 预设尺寸下拉菜单
+                img_input = gr.Image(height=350)
+                mode_options = gr.Radio(choices=size_mode, label="ID photo size options", value="Size list", elem_id="size")
+                # Preset size drop-down menu
                 with gr.Row(visible=True) as size_list_row:
-                    size_list_options = gr.Dropdown(choices=size_list, label="预设尺寸", value="一寸", elem_id="size_list")
+                    size_list_options = gr.Dropdown(choices=size_list, label="Preset sizes", value="One inch", elem_id="size_list")
 
                 with gr.Row(visible=False) as custom_size:
                     custom_size_height = gr.Number(value=413, label="height", interactive=True)
                     custom_size_wdith = gr.Number(value=295, label="width", interactive=True)
 
-                color_options = gr.Radio(choices=colors, label="背景色", value="蓝色", elem_id="color")
+                color_options = gr.Radio(choices=colors, label="Background color", value="Blue", elem_id="color")
                 with gr.Row(visible=False) as custom_color:
                     custom_color_R = gr.Number(value=0, label="R", interactive=True)
                     custom_color_G = gr.Number(value=0, label="G", interactive=True)
                     custom_color_B = gr.Number(value=0, label="B", interactive=True)
 
-                render_options = gr.Radio(choices=render, label="渲染方式", value="纯色", elem_id="render")
+                render_options = gr.Radio(choices=render, label="Rendering method", value="Solid color", elem_id="render")
 
-                img_but = gr.Button('开始制作')
-                # 案例图片
+                img_but = gr.Button('Start making')
+                # Case Photos
                 example_images = gr.Dataset(components=[img_input],
                                             samples=[[path.as_posix()]
                                                      for path in sorted(pathlib.Path('images').rglob('*.jpg'))])
 
             with gr.Column():
-                notification = gr.Text(label="状态", visible=False)
+                notification = gr.Text(label="State", visible=False)
                 with gr.Row():
-                    img_output_standard = gr.Image(label="标准照").style(height=350)
-                    img_output_standard_hd = gr.Image(label="高清照").style(height=350)
-                img_output_layout = gr.Image(label="六寸排版照").style(height=350)
+                    img_output_standard = gr.Image(label="Standard photo", height=350)
+                    img_output_standard_hd = gr.Image(label="High-resolution photos", height=350)
+                img_output_layout = gr.Image(label="Six-inch typography photo", height=350)
 
 
             def change_color(colors):
-                if colors == "自定义底色":
+                if colors == "Custom background color":
                     return {custom_color: gr.update(visible=True)}
                 else:
                     return {custom_color: gr.update(visible=False)}
 
             def change_size_mode(size_option_item):
-                if size_option_item == "自定义尺寸":
+                if size_option_item == "Custom size":
                     return {custom_size: gr.update(visible=True),
                             size_list_row: gr.update(visible=False)}
-                elif size_option_item == "只换底":
+                elif size_option_item == "Only change the background":
                     return {custom_size: gr.update(visible=False),
                             size_list_row: gr.update(visible=False)}
                 else:

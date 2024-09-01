@@ -12,7 +12,7 @@ def calTime(mark):
             def wrapper(*args, **kw):
                 start_time = time.time()
                 return_param = func(*args, **kw)
-                print("[Mark-{}] {} 函数花费的时间为 {:.2f}.".format(mark, func.__name__, time.time() - start_time))
+                print("[Mark-{}] {} The time taken by the function is {:.2f}.".format(mark, func.__name__, time.time() - start_time))
                 return return_param
 
             return wrapper
@@ -25,7 +25,7 @@ def calTime(mark):
         def wrapper(*args, **kw):
             start_time = time.time()
             return_param = func(*args, **kw)
-            print("{} 函数花费的时间为 {:.2f}.".format(func.__name__, time.time() - start_time))
+            print("{} The time taken by the function is {:.2f}.".format(func.__name__, time.time() - start_time))
             return return_param
 
         return wrapper
