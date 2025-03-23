@@ -69,6 +69,7 @@ def hollowOutFix(src: np.ndarray) -> np.ndarray:
     contours = [x for x in contours]
     # contours = np.squeeze(contours)
     contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
+    # a_contour = cv2.drawContours(np.zeros(a.shape, np.uint8), contours, 0, 255, 2)
     a_contour = cv2.drawContours(np.zeros(a.shape, np.uint8), contours[0], -1, 255, 2)
     # a_base = a_contour[1:-1, 1:-1]
     h, w = a.shape[:2]
